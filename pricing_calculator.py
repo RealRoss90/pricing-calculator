@@ -43,7 +43,6 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
     
     # Return results
     return {
-        "Job Name": job_name,
         "Job Price (Incl. GST)": f"${job_price:.2f}",
         "Net Price (Excl. GST)": f"${net_price:.2f}",
         "GST Amount (10%)": f"${gst_amount:.2f}",
@@ -66,6 +65,8 @@ if "saved_jobs" not in st.session_state:
 job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
 selected_job = st.selectbox("Select an existing job or create a new one:", options=["New Job"] + job_names, key="job_select")
 
+quote = None  # Ensure quote exists before saving
+
 if selected_job == "New Job":
     job_name = st.text_input("Enter New Job Name:")
     job_price = st.number_input("Enter Job Price (Incl. GST) ($):", min_value=0.0, step=50.0, format="%.2f")
@@ -79,6 +80,7 @@ else:
         st.write("**Loaded Job Details:**")
         for key, value in job_details.items():
             st.write(f"**{key}:** {value}")
+        quote = job_details  # Load existing quote data
 
 if st.button("Calculate"):
     if job_price > 0:
@@ -94,7 +96,7 @@ if st.button("Calculate"):
             st.write(f"**{key}:** {value}")
 
 # Separate Save Button
-if selected_job == "New Job" and job_name:
+if selected_job == "New Job" and job_name and quote:
     if st.button("Save Quote"):
         new_job = {"Job Name": job_name, **quote}
         st.session_state.saved_jobs.append(new_job)
