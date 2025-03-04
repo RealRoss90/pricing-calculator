@@ -62,7 +62,7 @@ st.write("Enter either a job price or the estimated labour hours, and the calcul
 if "saved_jobs" not in st.session_state:
     st.session_state.saved_jobs = []
 
-# Load saved job names
+# Load saved job names and allow selection
 job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
 selected_job = st.selectbox("Select an existing job or create a new one:", options=["New Job"] + job_names, key="job_select")
 
@@ -95,9 +95,9 @@ if st.button("Calculate"):
         
         if job_name and selected_job == "New Job":
             if st.button("Save Quote", key="save_button"):
-                st.session_state.saved_jobs.append({"Job Name": job_name, **quote})
-                st.session_state["job_select"] = job_name  # Update dropdown selection
-                st.success(f"Saved: {job_name}")
+                new_job = {"Job Name": job_name, **quote}
+                st.session_state.saved_jobs.append(new_job)
+                st.session_state.job_select = job_name  # Force dropdown update
                 st.experimental_rerun()
 
 # Ensure saved jobs update after saving
