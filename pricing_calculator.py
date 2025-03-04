@@ -63,7 +63,7 @@ if "saved_jobs" not in st.session_state:
 if "job_select" not in st.session_state:
     st.session_state.job_select = "New Job"
 
-# Load saved job names and allow selection
+# Refresh job names
 job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
 selected_job = st.selectbox("Select an existing job or create a new one:", options=["New Job"] + job_names, index=0, key="job_select")
 
@@ -110,3 +110,7 @@ if st.session_state.saved_jobs:
     st.subheader("Saved Quotes")
     df = pd.DataFrame(st.session_state.saved_jobs)
     st.dataframe(df)
+    
+    # Refresh dropdown after saving
+    job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
+    st.session_state.job_select = job_names[-1]  # Select last saved job
