@@ -79,18 +79,22 @@ if st.button("Calculate"):
         for key, value in quote.items():
             st.write(f"**{key}:** {value}")
         
-        if st.button("Save Quote") and job_name:
-            st.session_state.saved_jobs.append({"Job Name": job_name, **quote})
-            st.success(f"Saved: {job_name}")
+        if job_name:
+            if st.button("Save Quote"):
+                st.session_state.saved_jobs.append({"Job Name": job_name, **quote})
+                st.success(f"Saved: {job_name}")
+                st.rerun()
 
 if st.session_state.saved_jobs:
     st.subheader("Saved Quotes")
     df = pd.DataFrame(st.session_state.saved_jobs)
     st.dataframe(df)
     
-    selected_job = st.selectbox("Select a Job to Load:", options=[job["Job Name"] for job in st.session_state.saved_jobs])
-    if selected_job:
+    job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
+    if job_names:
+        selected_job = st.selectbox("Select a Job to Load:", options=job_names, index=0)
         job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_job), None)
+        
         if job_details:
             st.subheader(f"Loaded Job: {selected_job}")
             for key, value in job_details.items():
