@@ -90,13 +90,15 @@ if job_name and quote:
     if st.button("Save Job"):
         new_job = {"Job Name": job_name, **quote}
         st.session_state.saved_jobs.append(new_job)
+        st.session_state.selected_saved_job = job_name  # Update selected job
         st.success(f"Saved: {job_name}")
+        st.experimental_rerun()
 
-# Saved Jobs Section
-if st.session_state.saved_jobs:
+# Display Saved Jobs Section only if there are saved jobs
+if len(st.session_state.saved_jobs) > 0:
     st.subheader("Saved Jobs")
     saved_job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
-    selected_saved_job = st.selectbox("Select a saved job to view:", ["Select a Job"] + saved_job_names, index=0)
+    selected_saved_job = st.selectbox("Select a saved job to view:", ["Select a Job"] + saved_job_names, index=0, key="saved_job_dropdown")
     
     if selected_saved_job != "Select a Job":
         job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_saved_job), None)
