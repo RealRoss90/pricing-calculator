@@ -43,6 +43,7 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
     
     # Return results
     return {
+        "Job Name": job_name,
         "Job Price (Incl. GST)": f"${job_price:.2f}",
         "Net Price (Excl. GST)": f"${net_price:.2f}",
         "GST Amount (10%)": f"${gst_amount:.2f}",
@@ -86,3 +87,11 @@ if st.session_state.saved_jobs:
     st.subheader("Saved Quotes")
     df = pd.DataFrame(st.session_state.saved_jobs)
     st.dataframe(df)
+    
+    selected_job = st.selectbox("Select a Job to Load:", options=[job["Job Name"] for job in st.session_state.saved_jobs])
+    if selected_job:
+        job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_job), None)
+        if job_details:
+            st.subheader(f"Loaded Job: {selected_job}")
+            for key, value in job_details.items():
+                st.write(f"**{key}:** {value}")
