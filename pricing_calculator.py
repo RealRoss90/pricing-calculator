@@ -94,16 +94,14 @@ if st.button("Calculate"):
             st.write(f"**{key}:** {value}")
         
         if job_name and selected_job == "New Job":
-            if st.button("Save Quote"):
+            if st.button("Save Quote", key="save_button"):
                 st.session_state.saved_jobs.append({"Job Name": job_name, **quote})
+                st.session_state["job_select"] = job_name  # Update dropdown selection
                 st.success(f"Saved: {job_name}")
-                # Update the session state to refresh dropdown list
-                st.session_state.job_select = job_name
-                st.rerun()
+                st.experimental_rerun()
 
 # Ensure saved jobs update after saving
 if st.session_state.saved_jobs:
-    job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
     st.subheader("Saved Quotes")
     df = pd.DataFrame(st.session_state.saved_jobs)
     st.dataframe(df)
