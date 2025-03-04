@@ -102,8 +102,9 @@ if selected_job == "New Job" and job_name and quote:
     if st.button("Save Quote"):
         new_job = {"Job Name": job_name, **quote}
         st.session_state.saved_jobs.append(new_job)
-        st.session_state.job_select = job_name  # Update dropdown selection
-        st.experimental_rerun()
+        st.session_state.job_select = job_name  # Set the newly saved job as selected
+        st.session_state.saved_jobs = sorted(st.session_state.saved_jobs, key=lambda x: x["Job Name"])  # Keep list sorted
+        st.rerun()
 
 # Ensure saved jobs update after saving
 if st.session_state.saved_jobs:
