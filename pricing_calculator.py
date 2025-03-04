@@ -92,13 +92,14 @@ if st.button("Calculate"):
     if quote:
         for key, value in quote.items():
             st.write(f"**{key}:** {value}")
-        
-        if job_name and selected_job == "New Job":
-            if st.button("Save Quote", key="save_button"):
-                new_job = {"Job Name": job_name, **quote}
-                st.session_state.saved_jobs.append(new_job)
-                st.session_state.job_select = job_name  # Force dropdown update
-                st.experimental_rerun()
+
+# Separate Save Button
+if selected_job == "New Job" and job_name:
+    if st.button("Save Quote"):
+        new_job = {"Job Name": job_name, **quote}
+        st.session_state.saved_jobs.append(new_job)
+        st.session_state["job_select"] = job_name  # Update dropdown selection
+        st.rerun()
 
 # Ensure saved jobs update after saving
 if st.session_state.saved_jobs:
