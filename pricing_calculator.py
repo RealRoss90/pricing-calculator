@@ -63,7 +63,7 @@ if "saved_jobs" not in st.session_state:
 if "job_select" not in st.session_state:
     st.session_state.job_select = "New Job"
 
-# Refresh job names
+# Refresh job names dynamically
 job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
 selected_job = st.selectbox("Select an existing job or create a new one:", options=["New Job"] + job_names, index=0, key="job_select")
 
@@ -103,8 +103,7 @@ if selected_job == "New Job" and job_name and quote:
         new_job = {"Job Name": job_name, **quote}
         st.session_state.saved_jobs.append(new_job)
         st.session_state.job_select = job_name  # Set the newly saved job as selected
-        st.session_state.saved_jobs = sorted(st.session_state.saved_jobs, key=lambda x: x["Job Name"])  # Keep list sorted
-        st.rerun()
+        st.experimental_rerun()
 
 # Ensure saved jobs update after saving
 if st.session_state.saved_jobs:
