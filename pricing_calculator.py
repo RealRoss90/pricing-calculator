@@ -60,31 +60,18 @@ st.write("Enter either a job price or the estimated labour hours, and the calcul
 
 if "saved_jobs" not in st.session_state:
     st.session_state.saved_jobs = []
-if "job_select" not in st.session_state:
-    st.session_state.job_select = "New Job"
+if "selected_saved_job" not in st.session_state:
+    st.session_state.selected_saved_job = None
 
-# Refresh job names dynamically
-job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
-selected_job = st.selectbox("Select an existing job or create a new one:", options=["New Job"] + job_names, index=0, key="job_select")
+# New Job Entry Section
+st.subheader("Create a New Job")
+job_name = st.text_input("Enter New Job Name:")
+job_price = st.number_input("Enter Job Price (Incl. GST) ($):", min_value=0.0, step=50.0, format="%.2f")
+labour_hours = st.number_input("Enter Labour Hours (excluding sourcing):", min_value=0.0, step=0.5, format="%.1f")
 
 quote = None  # Ensure quote exists before saving
 
-if selected_job == "New Job":
-    job_name = st.text_input("Enter New Job Name:")
-    job_price = st.number_input("Enter Job Price (Incl. GST) ($):", min_value=0.0, step=50.0, format="%.2f")
-    labour_hours = st.number_input("Enter Labour Hours (excluding sourcing):", min_value=0.0, step=0.5, format="%.1f")
-else:
-    job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_job), None)
-    if job_details:
-        job_name = job_details["Job Name"]
-        job_price = float(job_details["Job Price (Incl. GST)"].replace("$", ""))
-        labour_hours = float(job_details["Recommended Labour Hours (Excluding Sourcing)"].replace(" hours", ""))
-        st.write("**Loaded Job Details:**")
-        for key, value in job_details.items():
-            st.write(f"**{key}:** {value}")
-        quote = job_details  # Load existing quote data
-
-if st.button("Calculate"):
+if st.button("Calculate New Job"):
     if job_price > 0:
         quote = quote_job(job_price=job_price)
     elif labour_hours > 0:
@@ -94,23 +81,26 @@ if st.button("Calculate"):
         quote = None
     
     if quote:
+        st.subheader("Job Quote Breakdown")
         for key, value in quote.items():
             st.write(f"**{key}:** {value}")
 
-# Separate Save Button
-if selected_job == "New Job" and job_name and quote:
-    if st.button("Save Quote"):
+# Save Job
+if job_name and quote:
+    if st.button("Save Job"):
         new_job = {"Job Name": job_name, **quote}
         st.session_state.saved_jobs.append(new_job)
-        st.session_state.job_select = job_name  # Set the newly saved job as selected
-        st.experimental_rerun()
+        st.success(f"Saved: {job_name}")
 
-# Ensure saved jobs update after saving
+# Saved Jobs Section
 if st.session_state.saved_jobs:
-    st.subheader("Saved Quotes")
-    df = pd.DataFrame(st.session_state.saved_jobs)
-    st.dataframe(df)
+    st.subheader("Saved Jobs")
+    saved_job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
+    selected_saved_job = st.selectbox("Select a saved job to view:", ["Select a Job"] + saved_job_names, index=0)
     
-    # Refresh dropdown after saving
-    job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
-    st.session_state.job_select = job_names[-1]  # Select last saved job
+    if selected_saved_job != "Select a Job":
+        job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_saved_job), None)
+        if job_details:
+            st.subheader(f"Job Details: {selected_saved_job}")
+            for key, value in job_details.items():
+                st.write(f"**{key}:** {value}")
