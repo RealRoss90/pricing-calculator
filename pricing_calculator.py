@@ -1,27 +1,7 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
-import json
 
-# Database setup
-conn = sqlite3.connect('jobs.db')
-c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS jobs
-             (name TEXT PRIMARY KEY, details TEXT)''')
-conn.commit()
-
-def save_job(job_details):
-    job_name = job_details['Job Name']
-    job_details_json = json.dumps(job_details)
-    c.execute("INSERT OR REPLACE INTO jobs (name, details) VALUES (?, ?)",
-              (job_name, job_details_json))
-    conn.commit()
-
-def load_jobs():
-    c.execute("SELECT * FROM jobs")
-    return {row[0]: json.loads(row[1]) for row in c.fetchall()}
-
-def quote_job(job_name, job_price=None, labour_hours=None, cogs_percentage=0.15, labour_rate_per_hour=35, sourcing_hours=2, gst_rate=0.1):
+def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_rate_per_hour=35, sourcing_hours=2, gst_rate=0.1):
     """
     Calculate job profitability based on job price, labour hours, COGS, labour costs, and GST.
     Allows estimating either job price or required labour hours.
@@ -79,6 +59,46 @@ st.title("Job Pricing Calculator")
 
 st.write("Enter either a job price or the estimated labour hours, and the calculator will provide a full cost breakdown.")
 
-saved_jobs = load_jobs()
-job_names = ["New Job"] + list(saved_jobs.keys())
-selected_job = st
+if "saved_jobs" not in st.session_state:
+    st.session_state.saved_jobs = []
+
+job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
+selected_job = st.selectbox("Select an existing job or create a new one:", options=["New Job"] + job_names)
+
+if selected_job == "New Job":
+    job_name = st.text_input("Enter New Job Name:")
+    job_price = st.number_input("Enter Job Price (Incl. GST) ($):", min_value=0.0, step=50.0, format="%.2f")
+    labour_hours = st.number_input("Enter Labour Hours (excluding sourcing):", min_value=0.0, step=0.5, format="%.1f")
+else:
+    job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_job), None)
+    if job_details:
+        job_name = job_details["Job Name"]
+        job_price = float(job_details["Job Price (Incl. GST)"].replace("$", ""))
+        labour_hours = float(job_details["Recommended Labour Hours (Excluding Sourcing)"].replace(" hours", ""))
+        st.write("**Loaded Job Details:**")
+        for key, value in job_details.items():
+            st.write(f"**{key}:** {value}")
+
+if st.button("Calculate"):
+    if job_price > 0:
+        quote = quote_job(job_price=job_price)
+    elif labour_hours > 0:
+        quote = quote_job(labour_hours=labour_hours)
+    else:
+        st.error("Please enter either a job price or labour hours.")
+        quote = None
+    
+    if quote:
+        for key, value in quote.items():
+            st.write(f"**{key}:** {value}")
+        
+        if job_name and selected_job == "New Job":
+            if st.button("Save Quote"):
+                st.session_state.saved_jobs.append({"Job Name": job_name, **quote})
+                st.success(f"Saved: {job_name}")
+                st.rerun()
+
+if st.session_state.saved_jobs:
+    st.subheader("Saved Quotes")
+    df = pd.DataFrame(st.session_state.saved_jobs)
+    st.dataframe(df)
