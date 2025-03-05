@@ -92,7 +92,6 @@ if job_name and quote:
         st.session_state.saved_jobs.append(new_job)
         st.session_state.selected_saved_job = job_name  # Update selected job
         st.success(f"Saved: {job_name}")
-        st.experimental_rerun()
 
 # Display Saved Jobs Section only if there are saved jobs
 if len(st.session_state.saved_jobs) > 0:
