@@ -58,19 +58,19 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
 # Streamlit App for Interactive Quoting with Farmacy Branding
 st.set_page_config(page_title="Farmacy Job Pricing Calculator", page_icon="🌱", layout="centered")
 
-# Persist Logo in Session State
-if "logo_image" not in st.session_state:
-    st.session_state.logo_image = None
-
+# Upload Farmacy Logo and Persist it
 st.sidebar.subheader("Upload Farmacy Logo")
 logo_file = st.sidebar.file_uploader("Upload a PNG file", type=["png"])
 
+logo_path = "uploaded_logo.png"
 if logo_file is not None:
-    st.session_state.logo_image = Image.open(logo_file)
-    st.sidebar.success("Logo uploaded successfully!")
+    with open(logo_path, "wb") as f:
+        f.write(logo_file.getbuffer())
+    st.sidebar.success("Logo uploaded successfully! It will be saved for future use.")
 
-if st.session_state.logo_image:
-    st.image(st.session_state.logo_image, width=250)
+# Display the saved logo
+if os.path.exists(logo_path):
+    st.image(logo_path, width=250)
 elif os.path.exists("Farmacy logo.png"):
     st.image("Farmacy logo.png", width=250)
 else:
