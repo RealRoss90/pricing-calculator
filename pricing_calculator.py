@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import os
 
 def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_rate_per_hour=35, sourcing_hours=2, gst_rate=0.1):
     """
@@ -56,8 +57,13 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
 # Streamlit App for Interactive Quoting with Farmacy Branding
 st.set_page_config(page_title="Farmacy Job Pricing Calculator", page_icon="🌱", layout="centered")
 
-# Farmacy Branding
-st.image("Farmacy logo.png", width=250)
+# Load Farmacy Logo Safely
+logo_path = "Farmacy logo.png"
+if os.path.exists(logo_path):
+    st.image(logo_path, width=250)
+else:
+    st.warning("Logo not found. Please upload a logo file named 'Farmacy logo.png' to the app directory.")
+
 st.markdown("""
     <h1 style='text-align: center; color: #8B5A2B;'>Farmacy Job Pricing Calculator</h1>
     <p style='text-align: center; font-size: 18px; color: #5C4033;'>Easily estimate job costs and profitability.</p>
