@@ -53,10 +53,16 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
         "Recommended Labour Hours (Excluding Sourcing)": f"{round(labour_hours, 2)} hours" if job_price is not None else f"{labour_hours} hours",
     }
 
-# Streamlit App for Interactive Quoting
-st.title("Job Pricing Calculator")
+# Streamlit App for Interactive Quoting with Farmacy Branding
+st.set_page_config(page_title="Farmacy Job Pricing Calculator", page_icon="🌱", layout="centered")
 
-st.write("Enter either a job price or the estimated labour hours, and the calculator will provide a full cost breakdown.")
+# Farmacy Branding
+st.image("https://your-logo-url.com/farmacy-logo.png", width=200)
+st.markdown("""
+    <h1 style='text-align: center; color: #4CAF50;'>Farmacy Job Pricing Calculator</h1>
+    <p style='text-align: center; font-size: 18px;'>Easily estimate job costs and profitability.</p>
+    <hr>
+""", unsafe_allow_html=True)
 
 if "saved_jobs" not in st.session_state:
     st.session_state.saved_jobs = []
@@ -71,7 +77,7 @@ labour_hours = st.number_input("Enter Labour Hours (excluding sourcing):", min_v
 
 quote = None  # Ensure quote exists before saving
 
-if st.button("Calculate New Job"):
+if st.button("Calculate New Job", help="Click to calculate job costs and profit"):
     if job_price > 0:
         quote = quote_job(job_price=job_price)
     elif labour_hours > 0:
@@ -82,12 +88,13 @@ if st.button("Calculate New Job"):
     
     if quote:
         st.subheader("Job Quote Breakdown")
+        st.write("### Estimated Costs & Profit")
         for key, value in quote.items():
-            st.write(f"**{key}:** {value}")
+            st.markdown(f"**{key}:** {value}")
 
 # Save Job
 if job_name and quote:
-    if st.button("Save Job"):
+    if st.button("Save Job", help="Click to save this job for future reference"):
         new_job = {"Job Name": job_name, **quote}
         st.session_state.saved_jobs.append(new_job)
         st.session_state.selected_saved_job = job_name  # Update selected job
@@ -95,13 +102,13 @@ if job_name and quote:
 
 # Display Saved Jobs Section only if there are saved jobs
 if len(st.session_state.saved_jobs) > 0:
-    st.subheader("Saved Jobs")
+    st.subheader("📂 Saved Jobs")
     saved_job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
     selected_saved_job = st.selectbox("Select a saved job to view:", ["Select a Job"] + saved_job_names, index=0, key="saved_job_dropdown")
     
     if selected_saved_job != "Select a Job":
         job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_saved_job), None)
         if job_details:
-            st.subheader(f"Job Details: {selected_saved_job}")
+            st.subheader(f"📋 Job Details: {selected_saved_job}")
             for key, value in job_details.items():
-                st.write(f"**{key}:** {value}")
+                st.markdown(f"**{key}:** {value}")
