@@ -78,7 +78,7 @@ else:
             st.experimental_rerun()
 
 st.markdown("""
-    <h1 style='text-align: center; color: #8B5A2B;'>Farmacy Job Pricing Calculator</h1>
+    <h1 style='text-align: center; color: #8B5A2B;'>Pricing Calculator</h1>
     <p style='text-align: center; font-size: 18px; color: #5C4033;'>Easily estimate job costs and profitability.</p>
     <hr>
 """, unsafe_allow_html=True)
