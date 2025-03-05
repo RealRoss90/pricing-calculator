@@ -56,7 +56,7 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
     }
 
 # Streamlit App for Interactive Quoting with Farmacy Branding
-st.set_page_config(page_title="Farmacy Job Pricing Calculator", page_icon="🌱", layout="centered")
+st.set_page_config(page_title="Pricing Calculator", page_icon="🌱", layout="centered")
 
 # Define Logo Path
 logo_path = "uploaded_logo.png"
