@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
+from PIL import Image
 
 def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_rate_per_hour=35, sourcing_hours=2, gst_rate=0.1):
     """
@@ -57,13 +58,19 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
 # Streamlit App for Interactive Quoting with Farmacy Branding
 st.set_page_config(page_title="Farmacy Job Pricing Calculator", page_icon="🌱", layout="centered")
 
-# Upload Farmacy Logo
+# Persist Logo in Session State
+if "logo_image" not in st.session_state:
+    st.session_state.logo_image = None
+
 st.sidebar.subheader("Upload Farmacy Logo")
 logo_file = st.sidebar.file_uploader("Upload a PNG file", type=["png"])
 
 if logo_file is not None:
+    st.session_state.logo_image = Image.open(logo_file)
     st.sidebar.success("Logo uploaded successfully!")
-    st.image(logo_file, width=250)
+
+if st.session_state.logo_image:
+    st.image(st.session_state.logo_image, width=250)
 elif os.path.exists("Farmacy logo.png"):
     st.image("Farmacy logo.png", width=250)
 else:
