@@ -57,10 +57,10 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
 st.set_page_config(page_title="Farmacy Job Pricing Calculator", page_icon="🌱", layout="centered")
 
 # Farmacy Branding
-st.image("https://your-logo-url.com/farmacy-logo.png", width=200)
+st.image("Farmacy logo.png", width=250)
 st.markdown("""
-    <h1 style='text-align: center; color: #4CAF50;'>Farmacy Job Pricing Calculator</h1>
-    <p style='text-align: center; font-size: 18px;'>Easily estimate job costs and profitability.</p>
+    <h1 style='text-align: center; color: #8B5A2B;'>Farmacy Job Pricing Calculator</h1>
+    <p style='text-align: center; font-size: 18px; color: #5C4033;'>Easily estimate job costs and profitability.</p>
     <hr>
 """, unsafe_allow_html=True)
 
