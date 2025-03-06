@@ -50,9 +50,9 @@ st.markdown("""
 
 # Sidebar for adjustable assumptions
 st.sidebar.header("Adjustable Inputs")
-original_piece_min, original_piece_max = st.sidebar.slider("Price of Original Piece ($)", min_value=50.0, max_value=500.0, value=(100.0, 200.0), step=10.0)
+original_piece_min, original_piece_max = st.sidebar.slider("Price of Original Piece ($)", min_value=20.0, max_value=500.0, value=(100.0, 200.0), step=10.0)
 labour_hours = st.sidebar.number_input("Labour Hours (Including Sourcing)", min_value=0.0, value=3.0, step=0.5)
-labour_cost = labour_hours * 50  # Fixed hourly rate at $50
+labour_cost = labour_hours * 80  # Fixed hourly rate at $50
 profit = 500  # Fixed profit per job
 gst_rate = st.sidebar.slider("GST Rate", min_value=0.0, max_value=0.2, value=0.1, step=0.01)
 
