@@ -48,14 +48,14 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
         "Job Price (Incl. GST)": f"${job_price:.2f}",
         "Net Price (Excl. GST)": f"${net_price:.2f}",
         "GST Amount (10%)": f"${gst_amount:.2f}",
-        "COGS Cost (15%)": f"${cogs_cost:.2f}",
-        "Labour Cost (20%)": f"${labour_cost:.2f}",
+        "COGS Cost": f"${cogs_cost:.2f}",
+        "Labour Cost": f"${labour_cost:.2f}",
         "Total Cost": f"${total_cost:.2f}",
         "Profit per Job": f"${profit:.2f}",
         "Recommended Labour Hours (Excluding Sourcing)": f"{round(labour_hours, 2)} hours" if job_price is not None else f"{labour_hours} hours",
     }
 
-# Streamlit App for Interactive Quoting with Farmacy Branding
+# Streamlit App for Interactive Quoting with Adjustable Assumptions
 st.set_page_config(page_title="Pricing Calculator", page_icon="🌱", layout="centered")
 
 # Define Logo Path
@@ -83,6 +83,13 @@ st.markdown("""
     <hr>
 """, unsafe_allow_html=True)
 
+# Sidebar for adjustable assumptions
+st.sidebar.header("Adjustable Assumptions")
+cogs_percentage = st.sidebar.slider("COGS Percentage", min_value=0.0, max_value=1.0, value=0.15, step=0.01)
+labour_rate_per_hour = st.sidebar.number_input("Labour Rate ($/hr)", min_value=10.0, value=35.0, step=1.0)
+sourcing_hours = st.sidebar.number_input("Sourcing Time (hrs)", min_value=0.0, value=2.0, step=0.5)
+gst_rate = st.sidebar.slider("GST Rate", min_value=0.0, max_value=0.2, value=0.1, step=0.01)
+
 if "saved_jobs" not in st.session_state:
     st.session_state.saved_jobs = []
 if "selected_saved_job" not in st.session_state:
@@ -98,9 +105,9 @@ quote = None  # Ensure quote exists before saving
 
 if st.button("Calculate New Job", help="Click to calculate job costs and profit"):
     if job_price > 0:
-        quote = quote_job(job_price=job_price)
+        quote = quote_job(job_price=job_price, cogs_percentage=cogs_percentage, labour_rate_per_hour=labour_rate_per_hour, sourcing_hours=sourcing_hours, gst_rate=gst_rate)
     elif labour_hours > 0:
-        quote = quote_job(labour_hours=labour_hours)
+        quote = quote_job(labour_hours=labour_hours, cogs_percentage=cogs_percentage, labour_rate_per_hour=labour_rate_per_hour, sourcing_hours=sourcing_hours, gst_rate=gst_rate)
     else:
         st.error("Please enter either a job price or labour hours.")
         quote = None
@@ -110,24 +117,3 @@ if st.button("Calculate New Job", help="Click to calculate job costs and profit"
         st.write("### Estimated Costs & Profit")
         for key, value in quote.items():
             st.markdown(f"**{key}:** {value}")
-
-# Save Job
-if job_name and quote:
-    if st.button("Save Job", help="Click to save this job for future reference"):
-        new_job = {"Job Name": job_name, **quote}
-        st.session_state.saved_jobs.append(new_job)
-        st.session_state.selected_saved_job = job_name  # Update selected job
-        st.success(f"Saved: {job_name}")
-
-# Display Saved Jobs Section only if there are saved jobs
-if len(st.session_state.saved_jobs) > 0:
-    st.subheader("📂 Saved Jobs")
-    saved_job_names = [job["Job Name"] for job in st.session_state.saved_jobs]
-    selected_saved_job = st.selectbox("Select a saved job to view:", ["Select a Job"] + saved_job_names, index=0, key="saved_job_dropdown")
-    
-    if selected_saved_job != "Select a Job":
-        job_details = next((job for job in st.session_state.saved_jobs if job["Job Name"] == selected_saved_job), None)
-        if job_details:
-            st.subheader(f"📋 Job Details: {selected_saved_job}")
-            for key, value in job_details.items():
-                st.markdown(f"**{key}:** {value}")
