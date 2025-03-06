@@ -3,7 +3,7 @@ import pandas as pd
 import os
 from PIL import Image
 
-def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_rate_per_hour=35, sourcing_hours=2, gst_rate=0.1):
+def quote_job(job_price=None, labour_hours=None, cogs_min=100, cogs_max=200, labour_rate_per_hour=35, sourcing_hours=2, gst_rate=0.1):
     """
     Calculate job profitability based on job price, labour hours, COGS, labour costs, and GST.
     Allows estimating either job price or required labour hours.
@@ -14,12 +14,15 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
         net_price = job_price - gst_amount  # Excluding GST
         
         # Calculate costs
-        cogs_cost = net_price * cogs_percentage
+        cogs_cost_min = cogs_min
+        cogs_cost_max = cogs_max
         labour_cost = net_price * 0.2  # Labour is assumed to be 20% of net price
-        total_cost = cogs_cost + labour_cost
+        total_cost_min = cogs_cost_min + labour_cost
+        total_cost_max = cogs_cost_max + labour_cost
         
         # Calculate profit
-        profit = net_price - total_cost
+        profit_min = net_price - total_cost_max
+        profit_max = net_price - total_cost_min
         
         # Calculate recommended labour hours (excluding sourcing time)
         labour_hours = (labour_cost / labour_rate_per_hour) - sourcing_hours
@@ -34,24 +37,27 @@ def quote_job(job_price=None, labour_hours=None, cogs_percentage=0.15, labour_ra
         gst_amount = job_price * (gst_rate / (1 + gst_rate))
         
         # Calculate COGS and total cost
-        cogs_cost = net_price * cogs_percentage
-        total_cost = cogs_cost + labour_cost
+        cogs_cost_min = cogs_min
+        cogs_cost_max = cogs_max
+        total_cost_min = cogs_cost_min + labour_cost
+        total_cost_max = cogs_cost_max + labour_cost
         
         # Calculate profit
-        profit = net_price - total_cost
+        profit_min = net_price - total_cost_max
+        profit_max = net_price - total_cost_min
     
     else:
         raise ValueError("Either job_price or labour_hours must be provided.")
     
     # Return results
     return {
-        "Job Price (Incl. GST)": f"${job_price:.2f}",
+        "Job Price (Incl. GST)": f"${job_price:.2f}" if cogs_min == cogs_max else f"${job_price:.2f} - ${job_price:.2f}",
         "Net Price (Excl. GST)": f"${net_price:.2f}",
         "GST Amount (10%)": f"${gst_amount:.2f}",
-        "COGS Cost": f"${cogs_cost:.2f}",
+        "COGS Cost": f"${cogs_cost_min:.2f} - ${cogs_cost_max:.2f}",
         "Labour Cost": f"${labour_cost:.2f}",
-        "Total Cost": f"${total_cost:.2f}",
-        "Profit per Job": f"${profit:.2f}",
+        "Total Cost": f"${total_cost_min:.2f} - ${total_cost_max:.2f}",
+        "Profit per Job": f"${profit_min:.2f} - ${profit_max:.2f}",
         "Recommended Labour Hours (Excluding Sourcing)": f"{round(labour_hours, 2)} hours" if job_price is not None else f"{labour_hours} hours",
     }
 
@@ -85,7 +91,7 @@ st.markdown("""
 
 # Sidebar for adjustable assumptions
 st.sidebar.header("Adjustable Assumptions")
-cogs_percentage = st.sidebar.slider("COGS Percentage", min_value=0.0, max_value=1.0, value=0.15, step=0.01)
+cogs_min, cogs_max = st.sidebar.slider("Price of Original Piece ($)", min_value=50.0, max_value=500.0, value=(100.0, 200.0), step=10.0)
 labour_rate_per_hour = st.sidebar.number_input("Labour Rate ($/hr)", min_value=10.0, value=35.0, step=1.0)
 sourcing_hours = st.sidebar.number_input("Sourcing Time (hrs)", min_value=0.0, value=2.0, step=0.5)
 gst_rate = st.sidebar.slider("GST Rate", min_value=0.0, max_value=0.2, value=0.1, step=0.01)
@@ -105,9 +111,9 @@ quote = None  # Ensure quote exists before saving
 
 if st.button("Calculate New Job", help="Click to calculate job costs and profit"):
     if job_price > 0:
-        quote = quote_job(job_price=job_price, cogs_percentage=cogs_percentage, labour_rate_per_hour=labour_rate_per_hour, sourcing_hours=sourcing_hours, gst_rate=gst_rate)
+        quote = quote_job(job_price=job_price, cogs_min=cogs_min, cogs_max=cogs_max, labour_rate_per_hour=labour_rate_per_hour, sourcing_hours=sourcing_hours, gst_rate=gst_rate)
     elif labour_hours > 0:
-        quote = quote_job(labour_hours=labour_hours, cogs_percentage=cogs_percentage, labour_rate_per_hour=labour_rate_per_hour, sourcing_hours=sourcing_hours, gst_rate=gst_rate)
+        quote = quote_job(labour_hours=labour_hours, cogs_min=cogs_min, cogs_max=cogs_max, labour_rate_per_hour=labour_rate_per_hour, sourcing_hours=sourcing_hours, gst_rate=gst_rate)
     else:
         st.error("Please enter either a job price or labour hours.")
         quote = None
